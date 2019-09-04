@@ -32,13 +32,20 @@ class Fantasy:
         soup = BeautifulSoup(page.content, 'html.parser')
         table = soup.find('table', id='rank-data').find('tbody')
         for row in table.findAll('tr', {'class': 'player-row'}):
-            yield (Player(name=row.find('a', {'class': 'fp-player-link'})['fp-player-name'],
-                          rank=int(row.find('td').text)))
+            yield(row.find('a', {'class': 'fp-player-link'})['fp-player-name'])
 
     def season_rankings(self, position):
         """ Get season rankings """
-        return self._parse_table('ros-{}.php?year={}'.format(position_url(position), self.year))
+        players = self._parse_table('ros-{}.php?year={}'.format(position_url(position), self.year))
+        if position == 'DST':
+            return [p.split(' ')[-1] for p in players]
+        else:
+            return players
 
     def week_rankings(self, position):
         """ Get weekly rankings """
-        return self._parse_table('ros-{}.php?week={}'.format(position_url(position), self.week))
+        players = self._parse_table('{}.php?week={}'.format(position_url(position), self.week))
+        if position == 'DST':
+            return [p.split(' ')[-1] for p in players]
+        else:
+            return players
