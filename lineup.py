@@ -7,6 +7,7 @@ CONFIG_FILE = 'config.yaml'
 
 class Lineup:
     def __init__(self):
+        self.QB = None
         self.RB1 = None
         self.RB2 = None
         self.WR1 = None
@@ -16,11 +17,13 @@ class Lineup:
         self.K = None
         self.DST = None
 
-    def render(self):
+    def render(self, team_id, league_id):
+        """ Renders the appropriate Jinja2 template for HTML email """
         t = Template(open('templates/lineup.html', 'r').read())
-        return t.render(lineup=self)
+        return t.render(lineup=self, team_id=team_id, league_id=league_id)
 
     def __repr__(self):
+        """ Prints line-up for debugging purposes """
         return 'Optimal Line-Up:\n  RB1: {}\n  RB2: {}\n  WR1: {}\n' \
                '  WR2: {}\n  FlX: {}\n  TE:  {}\n  K:   {}\n  DST: {}'\
             .format(self.RB1, self.RB2, self.WR1, self.WR2, self.FLX,
@@ -41,6 +44,7 @@ if __name__ == '__main__':
         rankings = football.get_fpros_rankings('FLEX', 'week')
 
         # Fill in simple positions
+        lineup.QB = football.get_espn_roster('QB')[0]
         lineup.TE = football.get_espn_roster('TE')[0]
         lineup.K = football.get_espn_roster('K')[0]
         lineup.DST = football.get_espn_roster('DST')[0]
@@ -66,9 +70,11 @@ if __name__ == '__main__':
         flex_sorted = sorted(flex_ranked, key=lambda p: p['rank'])
         lineup.FLX = flex_sorted[0]['player']
 
-        # Send email
-        mail.send(subject=config['lineup']['subject'], html=lineup.render())
+        # Send action email
+        rendered = lineup.render(config['football']['team_id'], config['football']['league_id'])
+        mail.send(subject=config['lineup']['subject'], html=rendered)
 
     except Exception as e:
         # Send error email
         mail.send(subject='An Error Occurred', html=str(e))
+        raise e

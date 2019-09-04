@@ -16,7 +16,7 @@ class Email:
                              auth=('api', self.api_key),
                              data={'from': self.from_addr,
                                    'to': [self.to],
-                                   'subject': subject,
+                                   'subject': '{} 🏈'.format(subject),
                                    'html': html})
 
 

@@ -20,9 +20,9 @@ class Moves:
     def add_weekly(self, movelist):
         self.weekly_moves += movelist
 
-    def render(self):
+    def render(self, league_id):
         t = Template(open('templates/waiver.html', 'r',  encoding='utf-8').read())
-        return t.render(moves=self.sorted())
+        return t.render(moves=self.sorted(), league_id=league_id)
 
     def __repr__(self):
         return '\n'.join([str(m) for m in self.sorted()])
@@ -77,11 +77,11 @@ if __name__ == '__main__':
             rankings = football.get_fpros_rankings(pos, 'week')
             moves.add_weekly(waiver(rankings, available, pos, player))
 
-        # Send email
-        mail.send(subject=config['waiver']['subject'], html=moves.render())
+        # Send action email
+        rendered = moves.render(config['football']['league_id'])
+        mail.send(subject=config['waiver']['subject'], html=rendered)
 
     except Exception as e:
         # Send error email
         mail.send(subject='An Error Occurred', html=str(e))
-
-
+        raise e

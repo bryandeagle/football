@@ -2,27 +2,33 @@
   <head>
     <meta charset="utf-8"/>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
-    <style>
-	    body {font-family: 'Open Sans', sans-serif; word-break: keep-all;}
-      table {border-spacing: 0; padding: 1em 0; width: 100%;}
-      tr:nth-child(even) {background-color: #f0f0f0;}
-      tr:nth-child(odd) {background-color: #fdfdfd;}
-      thead td{background-color: #666; color: #fff;}
-      td {padding: 0.5em 1em; text-align: center;}
-    </style>
   </head>
-  <body>
-    Bryan,<br/><br/>Here are your waiver claims for the week:
-    <table>
-      <thead>
-        <tr><td>Drop</td><td>Pick-Up</td><td>Pos</td><td>Δ</td></tr>
+  <body style="font-family: 'Open Sans', sans-serif;">
+    Bryan,<br/><br/>It's time to <a href="https://fantasy.espn.com/football/players/add?leagueId={{ league_id }}" style="color: #00a; text-decoration:none;">add new players</a>. Here are the top ones this week:
+    <table style="border-spacing: 0; padding: 1em 0; min-width: 360px"">
+      <thead style="background-color: #666; color: #fff;">
+        <tr><td style="padding: 0.5em 1em;">Drop</td><td style="padding: 0.5em 1em;">Pick-Up</td><td style="padding: 0.5em 1em;">Pos</td><td style="padding: 0.5em 1em;">Δ</td></tr>
       </thead>
       <tbody>
         {% for move in moves %}
-        <tr><td>{{ move.drop }}</td><td>{{ move.pickup }}</td><td>{{ move.position }}</td><td>+{{ move.delta }}</td></tr>
+          {% if loop.index %2 == 0%}
+            <tr>
+              <td style="padding: 0.5em 1em; background-color: #f8f8f8; word-break: keep-all; text-align: center;">{{ move.drop }}</td>
+              <td style="padding: 0.5em 1em; background-color: #f8f8f8; word-break: keep-all; text-align: center;">{{ move.pickup }}</td>
+              <td style="padding: 0.5em 1em; background-color: #f8f8f8; word-break: keep-all; text-align: center;">{{ move.position }}</td>
+              <td style="padding: 0.5em 1em; background-color: #f8f8f8; word-break: keep-all; text-align: center;">+{{ move.delta }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td style="padding: 0.5em 1em; background-color: #fcfcfc; word-break: keep-all; text-align: center;">{{ move.drop }}</td>
+              <td style="padding: 0.5em 1em; background-color: #fcfcfc; word-break: keep-all; text-align: center;">{{ move.pickup }}</td>
+              <td style="padding: 0.5em 1em; background-color: #fcfcfc; word-break: keep-all; text-align: center;">{{ move.position }}</td>
+              <td style="padding: 0.5em 1em; background-color: #fcfcfc; word-break: keep-all; text-align: center;">+{{ move.delta }}</td>
+            </tr>
+          {% endif %}
         {% endfor %}
       </tbody>
     </table>
-    Best,<br/>Bryan
+    Always yours,<br/>Bryan
   </body>
 </html>
