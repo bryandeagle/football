@@ -2,12 +2,26 @@ from bs4 import BeautifulSoup
 from ff_espn_api import League
 from datetime import datetime
 import requests
-import yaml
+
+
+class Email:
+    def __init__(self, config):
+        self.url = config['mg_url']
+        self.api_key = config['api_key']
+        self.to = config['to']
+        self.from_addr = config['from']
+
+    def send(self, subject, html):
+        return requests.post(self.url,
+                             auth=('api', self.api_key),
+                             data={'from': self.from_addr,
+                                   'to': [self.to],
+                                   'subject': subject,
+                                   'html': html})
 
 
 class Football:
-    def __init__(self, config_file):
-        config = yaml.load(open(config_file, 'r'))
+    def __init__(self, config):
         self.team_id = config['team_id']
         self.league = League(league_id=config['league_id'],
                              year=datetime.today().year,

@@ -1,4 +1,6 @@
-from football import Football
+from football import Football, Email
+from jinja2 import Template
+import yaml
 
 CONFIG_FILE = 'config.yaml'
 
@@ -9,22 +11,27 @@ class Lineup:
         self.RB2 = None
         self.WR1 = None
         self.WR2 = None
-        self.Flex = None
+        self.FLX = None
         self.TE = None
         self.K = None
         self.DST = None
 
+    def render(self):
+        t = Template(open('templates/lineup.html', 'r').read())
+        return t.render(lineup=self)
+
     def __repr__(self):
         return 'Optimal Line-Up:\n  RB1: {}\n  RB2: {}\n  WR1: {}\n' \
                '  WR2: {}\n  FlX: {}\n  TE:  {}\n  K:   {}\n  DST: {}'\
-            .format(self.RB1, self.RB2, self.WR1, self.WR2, self.Flex,
+            .format(self.RB1, self.RB2, self.WR1, self.WR2, self.FLX,
                     self.TE, self.K, self.DST)
 
 
 if __name__ == '__main__':
 
     # Initialize API and lineup list
-    football = Football(CONFIG_FILE)
+    config = yaml.load(open(CONFIG_FILE, 'r'))
+    football = Football(config['football'])
     lineup = Lineup()
 
     # Get flex rankings from fantasy pros
@@ -54,6 +61,8 @@ if __name__ == '__main__':
     # Set lineup for flex position
     flex_ranked = rbs_sorted[2:] + wrs_sorted[2:]
     flex_sorted = sorted(flex_ranked, key=lambda p: p['rank'])
-    lineup.Flex = flex_sorted[0]['player']
+    lineup.FLX = flex_sorted[0]['player']
 
-    print(lineup)
+    # Send email
+    mail = Email(config['email'])
+    mail.send(subject=config['lineup']['subject'], html=lineup.render())
