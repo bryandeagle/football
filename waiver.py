@@ -54,26 +54,34 @@ def waiver(ranks, avail, position, to_drop):
 
 
 if __name__ == '__main__':
-
-    # Initialize API and move list
+    # Initial configuration
     config = yaml.load(open(CONFIG_FILE, 'r'))
-    football = Football(config['football'])
-    moves = Moves()
-
-    # Waiver RBs and WRs
-    for pos in ['RB', 'WR']:
-        available = football.get_espn_players(pos)
-        rankings = football.get_fpros_rankings(pos, 'season')
-        for player in football.get_espn_roster(pos):
-            moves.add_season(waiver(rankings, available, pos, player))
-
-    # Stream Players
-    for pos in ['QB', 'TE', 'K', 'DST']:
-        player = football.get_espn_roster(pos)[0]
-        available = football.get_espn_players(pos)
-        rankings = football.get_fpros_rankings(pos, 'week')
-        moves.add_weekly(waiver(rankings, available, pos, player))
-
-    # Send email
     mail = Email(config['email'])
-    mail.send(subject=config['waiver']['subject'], html=moves.render())
+
+    try:
+        # Initialize API and move list
+        football = Football(config['football'])
+        moves = Moves()
+
+        # Waiver RBs and WRs
+        for pos in ['RB', 'WR']:
+            available = football.get_espn_players(pos)
+            rankings = football.get_fpros_rankings(pos, 'season')
+            for player in football.get_espn_roster(pos):
+                moves.add_season(waiver(rankings, available, pos, player))
+
+        # Stream Players
+        for pos in ['QB', 'TE', 'K', 'DST']:
+            player = football.get_espn_roster(pos)[0]
+            available = football.get_espn_players(pos)
+            rankings = football.get_fpros_rankings(pos, 'week')
+            moves.add_weekly(waiver(rankings, available, pos, player))
+
+        # Send email
+        mail.send(subject=config['waiver']['subject'], html=moves.render())
+
+    except Exception as e:
+        # Send error email
+        mail.send(subject='An Error Occurred', html=str(e))
+
+

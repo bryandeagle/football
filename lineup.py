@@ -31,38 +31,44 @@ if __name__ == '__main__':
 
     # Initialize API and lineup list
     config = yaml.load(open(CONFIG_FILE, 'r'))
-    football = Football(config['football'])
-    lineup = Lineup()
-
-    # Get flex rankings from fantasy pros
-    rankings = football.get_fpros_rankings('FLEX', 'week')
-
-    # Fill in simple positions
-    lineup.TE = football.get_espn_roster('TE')[0]
-    lineup.K = football.get_espn_roster('K')[0]
-    lineup.DST = football.get_espn_roster('DST')[0]
-
-    # Get my roster
-    rbs = football.get_espn_roster('RB')
-    wrs = football.get_espn_roster('WR')
-
-    # Build list of dictionaries to include rank
-    rbs_ranked = [{'player': p, 'rank': rankings.index(p)} for p in rbs]
-    wrs_ranked = [{'player': p, 'rank': rankings.index(p)} for p in wrs]
-
-    # Sort list of dictionaries by rank
-    rbs_sorted = sorted(rbs_ranked, key=lambda p: p['rank'])
-    wrs_sorted = sorted(wrs_ranked, key=lambda p: p['rank'])
-
-    # Set lineup for RB and WR positions
-    lineup.RB1, lineup.RB2 = rbs_sorted[0]['player'], rbs_sorted[1]['player']
-    lineup.WR1, lineup.WR2 = wrs_sorted[0]['player'], wrs_sorted[1]['player']
-
-    # Set lineup for flex position
-    flex_ranked = rbs_sorted[2:] + wrs_sorted[2:]
-    flex_sorted = sorted(flex_ranked, key=lambda p: p['rank'])
-    lineup.FLX = flex_sorted[0]['player']
-
-    # Send email
     mail = Email(config['email'])
-    mail.send(subject=config['lineup']['subject'], html=lineup.render())
+
+    try:
+        football = Football(config['football'])
+        lineup = Lineup()
+
+        # Get flex rankings from fantasy pros
+        rankings = football.get_fpros_rankings('FLEX', 'week')
+
+        # Fill in simple positions
+        lineup.TE = football.get_espn_roster('TE')[0]
+        lineup.K = football.get_espn_roster('K')[0]
+        lineup.DST = football.get_espn_roster('DST')[0]
+
+        # Get my roster
+        rbs = football.get_espn_roster('RB')
+        wrs = football.get_espn_roster('WR')
+
+        # Build list of dictionaries to include rank
+        rbs_ranked = [{'player': p, 'rank': rankings.index(p)} for p in rbs]
+        wrs_ranked = [{'player': p, 'rank': rankings.index(p)} for p in wrs]
+
+        # Sort list of dictionaries by rank
+        rbs_sorted = sorted(rbs_ranked, key=lambda p: p['rank'])
+        wrs_sorted = sorted(wrs_ranked, key=lambda p: p['rank'])
+
+        # Set lineup for RB and WR positions
+        lineup.RB1, lineup.RB2 = rbs_sorted[0]['player'], rbs_sorted[1]['player']
+        lineup.WR1, lineup.WR2 = wrs_sorted[0]['player'], wrs_sorted[1]['player']
+
+        # Set lineup for flex position
+        flex_ranked = rbs_sorted[2:] + wrs_sorted[2:]
+        flex_sorted = sorted(flex_ranked, key=lambda p: p['rank'])
+        lineup.FLX = flex_sorted[0]['player']
+
+        # Send email
+        mail.send(subject=config['lineup']['subject'], html=lineup.render())
+
+    except Exception as e:
+        # Send error email
+        mail.send(subject='An Error Occurred', html=str(e))
