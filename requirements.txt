@@ -1,2 +1,4 @@
 ff-espn-api
+requests
 pyyaml
+bs4
