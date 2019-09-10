@@ -28,18 +28,28 @@ class Football:
                              espn_s2=config['espn_s2'],
                              swid=config['swid'])
 
+    @staticmethod
+    def _sanitize_players(players):
+        for p in players:
+            if p.position == 'D/ST':
+                p.name = p.name.replace(' D/ST', '')
+                p.position = 'DST'
+            else:
+                p.name = p.name.replace('.', '')
+        return players
+
     def get_espn_roster(self, position):
-        players = self.league.get_team_data(self.team_id).roster
         if position == 'DST':
-            return [p.name.replace(' D/ST', '') for p in players if p.position == 'D/ST']
-        else:
-            return [p.name.replace('.', '') for p in players if p.position == position]
+            position = 'D/ST'
+        players = self.league.get_team_data(self.team_id).roster
+        position_players = [p for p in players if p.position == position]
+        return self._sanitize_players(position_players)
 
     def get_espn_players(self, position):
         if position == 'DST':
-            return [x.name.replace(' D/ST', '') for x in self.league.free_agents(week=None, size=1000, position='D/ST')]
-        else:
-            return [x.name.replace('.', '') for x in self.league.free_agents(week=None, size=1000, position=position)]
+            position = 'D/ST'
+        free_agents = self.league.free_agents(week=None, size=1000, position=position)
+        return self._sanitize_players(free_agents)
 
     @staticmethod
     def get_fpros_rankings(position, time):

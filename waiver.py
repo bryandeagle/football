@@ -1,4 +1,5 @@
 from football import Football, Email
+from datetime import datetime
 from jinja2 import Template
 import yaml
 
@@ -20,35 +21,40 @@ class Moves:
     def add_weekly(self, movelist):
         self.weekly_moves += movelist
 
-    def render(self, league_id):
+    def render(self, league_id, year, team_id):
         t = Template(open('templates/waiver.html', 'r',  encoding='utf-8').read())
-        return t.render(moves=self.sorted(), league_id=league_id)
+        return t.render(moves=self.sorted(), league_id=league_id, year=year, team_id=team_id)
 
     def __repr__(self):
         return '\n'.join([str(m) for m in self.sorted()])
 
 
 class Move:
-    def __init__(self, position, drop, pickup, delta):
+    def __init__(self, position, drop, add, delta):
         self.position = position
         self.drop = drop
-        self.pickup = pickup
+        self.add = add
         self.delta = delta
 
     def __repr__(self):
         return 'Drop {} {} for {} for +{} rank.'.format(self.position,
                                                         self.drop,
-                                                        self.pickup,
+                                                        self.add,
                                                         self.delta)
 
 
 def waiver(ranks, avail, position, to_drop):
     """ Returns list of moves for players better than given """
-    current_rank = ranks.index(to_drop)
+    if to_drop.name in ranks:
+        current_rank = ranks.index(to_drop.name)
+    else:
+        current_rank = 200
+    avail_names = [p.name for p in avail]
     drops = list()
-    for rank, pickup in enumerate(ranks[:current_rank]):
-        if pickup in avail:
-            drops.append(Move(drop=to_drop, pickup=pickup,
+    for rank, add in enumerate(ranks[:current_rank]):
+        if add in avail_names:
+            add_player = avail[avail_names.index(add)]
+            drops.append(Move(drop=to_drop, add=add_player,
                               position=position, delta=current_rank - rank))
     return drops
 
@@ -78,7 +84,9 @@ if __name__ == '__main__':
             moves.add_weekly(waiver(rankings, available, pos, player))
 
         # Send action email
-        rendered = moves.render(config['football']['league_id'])
+        rendered = moves.render(league_id=config['football']['league_id'],
+                                year=datetime.today().year,
+                                team_id=config['football']['team_id'])
         mail.send(subject=config['waiver']['subject'], html=rendered)
 
     except Exception as e:

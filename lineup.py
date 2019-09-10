@@ -44,16 +44,16 @@ if __name__ == '__main__':
         rankings = football.get_fpros_rankings('FLEX', 'week')
 
         # Fill in simple positions
-        lineup.QB = football.get_espn_roster('QB')[0]
-        lineup.TE = football.get_espn_roster('TE')[0]
-        lineup.K = football.get_espn_roster('K')[0]
-        lineup.DST = football.get_espn_roster('DST')[0]
+        lineup.QB = football.get_espn_roster('QB')[0].name
+        lineup.TE = football.get_espn_roster('TE')[0].name
+        lineup.K = football.get_espn_roster('K')[0].name
+        lineup.DST = football.get_espn_roster('DST')[0].name
 
         # Get my roster
-        rbs = football.get_espn_roster('RB')
-        wrs = football.get_espn_roster('WR')
+        rbs = [p.name for p in football.get_espn_roster('RB') if p.name in rankings]
+        wrs = [p.name for p in football.get_espn_roster('WR') if p.name in rankings]
 
-        # Build list of dictionaries to include rank
+        # Get the ranks for my roster
         rbs_ranked = [{'player': p, 'rank': rankings.index(p)} for p in rbs]
         wrs_ranked = [{'player': p, 'rank': rankings.index(p)} for p in wrs]
 
