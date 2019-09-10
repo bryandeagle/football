@@ -1,8 +1,6 @@
-from football import Football, Email
+from football import Football, Email, CONFIG_FILE
 from jinja2 import Template
 import yaml
-
-CONFIG_FILE = 'config.yaml'
 
 
 class Lineup:
@@ -30,24 +28,23 @@ class Lineup:
                     self.TE, self.K, self.DST)
 
 
-if __name__ == '__main__':
-
+def lineup():
     # Initialize API and lineup list
     config = yaml.load(open(CONFIG_FILE, 'r'))
     mail = Email(config['email'])
 
     try:
         football = Football(config['football'])
-        lineup = Lineup()
+        line_up = Lineup()
 
         # Get flex rankings from fantasy pros
         rankings = football.get_fpros_rankings('FLEX', 'week')
 
         # Fill in simple positions
-        lineup.QB = football.get_espn_roster('QB')[0].name
-        lineup.TE = football.get_espn_roster('TE')[0].name
-        lineup.K = football.get_espn_roster('K')[0].name
-        lineup.DST = football.get_espn_roster('DST')[0].name
+        line_up.QB = football.get_espn_roster('QB')[0].name
+        line_up.TE = football.get_espn_roster('TE')[0].name
+        line_up.K = football.get_espn_roster('K')[0].name
+        line_up.DST = football.get_espn_roster('DST')[0].name
 
         # Get my roster
         rbs = [p.name for p in football.get_espn_roster('RB') if p.name in rankings]
@@ -62,19 +59,23 @@ if __name__ == '__main__':
         wrs_sorted = sorted(wrs_ranked, key=lambda p: p['rank'])
 
         # Set lineup for RB and WR positions
-        lineup.RB1, lineup.RB2 = rbs_sorted[0]['player'], rbs_sorted[1]['player']
-        lineup.WR1, lineup.WR2 = wrs_sorted[0]['player'], wrs_sorted[1]['player']
+        line_up.RB1, line_up.RB2 = rbs_sorted[0]['player'], rbs_sorted[1]['player']
+        line_up.WR1, line_up.WR2 = wrs_sorted[0]['player'], wrs_sorted[1]['player']
 
         # Set lineup for flex position
         flex_ranked = rbs_sorted[2:] + wrs_sorted[2:]
         flex_sorted = sorted(flex_ranked, key=lambda p: p['rank'])
-        lineup.FLX = flex_sorted[0]['player']
+        line_up.FLX = flex_sorted[0]['player']
 
         # Send action email
-        rendered = lineup.render(config['football']['team_id'], config['football']['league_id'])
+        rendered = line_up.render(config['football']['team_id'], config['football']['league_id'])
         mail.send(subject=config['lineup']['subject'], html=rendered)
 
     except Exception as e:
         # Send error email
         mail.send(subject='An Error Occurred', html=str(e))
         raise e
+
+
+if __name__ == '__main__':
+    lineup()

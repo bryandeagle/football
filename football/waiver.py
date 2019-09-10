@@ -1,9 +1,7 @@
-from football import Football, Email
+from football import Football, Email, CONFIG_FILE
 from datetime import datetime
 from jinja2 import Template
 import yaml
-
-CONFIG_FILE = 'config.yaml'
 
 
 class Moves:
@@ -43,7 +41,7 @@ class Move:
                                                         self.delta)
 
 
-def waiver(ranks, avail, position, to_drop):
+def waiver_moves(ranks, avail, position, to_drop):
     """ Returns list of moves for players better than given """
     if to_drop.name in ranks:
         current_rank = ranks.index(to_drop.name)
@@ -59,7 +57,7 @@ def waiver(ranks, avail, position, to_drop):
     return drops
 
 
-if __name__ == '__main__':
+def waiver():
     # Initial configuration
     config = yaml.load(open(CONFIG_FILE, 'r'))
     mail = Email(config['email'])
@@ -74,14 +72,14 @@ if __name__ == '__main__':
             available = football.get_espn_players(pos)
             rankings = football.get_fpros_rankings(pos, 'season')
             for player in football.get_espn_roster(pos):
-                moves.add_season(waiver(rankings, available, pos, player))
+                moves.add_season(waiver_moves(rankings, available, pos, player))
 
         # Stream Players
         for pos in ['QB', 'TE', 'K', 'DST']:
             player = football.get_espn_roster(pos)[0]
             available = football.get_espn_players(pos)
             rankings = football.get_fpros_rankings(pos, 'week')
-            moves.add_weekly(waiver(rankings, available, pos, player))
+            moves.add_weekly(waiver_moves(rankings, available, pos, player))
 
         # Send action email
         rendered = moves.render(league_id=config['football']['league_id'],
@@ -93,3 +91,7 @@ if __name__ == '__main__':
         # Send error email
         mail.send(subject='An Error Occurred', html=str(e))
         raise e
+
+
+if __name__ == '__main__':
+    waiver()

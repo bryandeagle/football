@@ -3,6 +3,8 @@ from ff_espn_api import League
 from datetime import datetime
 import requests
 
+CONFIG_FILE = 'config.yaml'
+
 
 class Email:
     def __init__(self, config):
