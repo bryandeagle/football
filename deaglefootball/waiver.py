@@ -1,4 +1,4 @@
-from .football import Football, Email, CONFIG_FILE
+from football import Football, Email, CONFIG_FILE
 from datetime import datetime
 from jinja2 import Template
 import yaml
