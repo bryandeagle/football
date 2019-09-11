@@ -1,4 +1,4 @@
-from football import Football, Email, CONFIG_FILE
+from .football import Football, Email, CONFIG_FILE
 from datetime import datetime
 from jinja2 import Template
 import yaml
@@ -41,7 +41,7 @@ class Move:
                                                         self.delta)
 
 
-def waiver_moves(ranks, avail, position, to_drop):
+def _waiver_moves(ranks, avail, position, to_drop):
     """ Returns list of moves for players better than given """
     if to_drop.name in ranks:
         current_rank = ranks.index(to_drop.name)
@@ -72,14 +72,14 @@ def waiver():
             available = football.get_espn_players(pos)
             rankings = football.get_fpros_rankings(pos, 'season')
             for player in football.get_espn_roster(pos):
-                moves.add_season(waiver_moves(rankings, available, pos, player))
+                moves.add_season(_waiver_moves(rankings, available, pos, player))
 
         # Stream Players
         for pos in ['QB', 'TE', 'K', 'DST']:
             player = football.get_espn_roster(pos)[0]
             available = football.get_espn_players(pos)
             rankings = football.get_fpros_rankings(pos, 'week')
-            moves.add_weekly(waiver_moves(rankings, available, pos, player))
+            moves.add_weekly(_waiver_moves(rankings, available, pos, player))
 
         # Send action email
         rendered = moves.render(league_id=config['football']['league_id'],
