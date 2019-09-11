@@ -1,13 +1,13 @@
 from setuptools import setup
 
-setup(name='football',
+setup(name='deaglefootball',
       version='0.1',
-      description='Fantasy football automations',
-      url='http://github.com/bryandeagle/football-autopilot',
+      description='Fantasy Football Auto Pilot',
+      url='http://github.com/bryandeagle/football',
       author='Bryan Deagle',
       author_email='bryan@dea.gl',
       license='MIT',
-      packages=['football'],
+      packages=['deaglefootball'],
       install_requires=[
           'ff-espn-api',
           'requests',
