@@ -22,7 +22,7 @@ email:
   to: 'bryan@dea.gl'
   from: 'football@mg.dea.gl'
 football:
-  team_id: 4
+  team_name: 'Chilladelphia Deagles'
   league_id: 1752514
   espn_s2: ''
   swid: ''

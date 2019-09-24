@@ -79,12 +79,12 @@ def waiver():
             player = football.get_espn_roster(pos)[0]
             available = football.get_espn_players(pos)
             rankings = football.get_fpros_rankings(pos, 'week')
-            moves.add_weekly(_waiver_moves(rankings, available, pos, player))
+            moves.add_weekly(_waiver_moves(rankings, available, pos, player)[:football.league_size])
 
         # Send action email
-        rendered = moves.render(league_id=config['football']['league_id'],
+        rendered = moves.render(league_id=football.league_id,
                                 year=datetime.today().year,
-                                team_id=config['football']['team_id'])
+                                team_id=football.team_id)
         mail.send(subject=config['waiver']['subject'], html=rendered)
 
     except Exception as e:

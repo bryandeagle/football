@@ -24,11 +24,18 @@ class Email:
 
 class Football:
     def __init__(self, config):
-        self.team_id = config['team_id']
+        self.league_id = config['league_id']
+        self.team_id = 0
         self.league = League(league_id=config['league_id'],
                              year=datetime.today().year,
                              espn_s2=config['espn_s2'],
                              swid=config['swid'])
+        all_teams = self.league.standings()
+        self.league_size = len(all_teams)
+        for team in all_teams:
+            if team.team_name == config['team_name']:
+                self.team_id = team.team_id
+                break
 
     @staticmethod
     def _sanitize_players(players):
