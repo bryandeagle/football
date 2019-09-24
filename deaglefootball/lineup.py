@@ -30,7 +30,7 @@ class Lineup:
 
 def lineup():
     # Initialize API and lineup list
-    config = yaml.load(open(CONFIG_FILE, 'r'))
+    config = yaml.load(open(CONFIG_FILE, 'r'), Loader=yaml.SafeLoader)
     mail = Email(config['email'])
 
     try:
@@ -68,7 +68,7 @@ def lineup():
         line_up.FLX = flex_sorted[0]['player']
 
         # Send action email
-        rendered = line_up.render(config['football']['team_id'], config['football']['league_id'])
+        rendered = line_up.render(football.team_id, football.league_id)
         mail.send(subject=config['lineup']['subject'], html=rendered)
 
     except Exception as e:

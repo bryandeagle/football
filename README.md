@@ -1,4 +1,4 @@
-# deaglefootball
+# football
 Fantasy Football Auto Pilot
 
 ## Installing
