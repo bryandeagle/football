@@ -6,7 +6,7 @@ email:
 football:
   team_id: 4
   league_id: 1752514
-  espn_s2: ''
+  espn_s2: 'SECRET'
   swid: ''
 lineup:
   subject: 'Action Required: Set Your Line-Up'
