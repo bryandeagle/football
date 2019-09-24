@@ -104,7 +104,7 @@ venv.bak/
 .mypy_cache/
 
 # configuration
-config.yaml
+deaglefootball/config.yaml
 
 # Pycharm
 .idea/
