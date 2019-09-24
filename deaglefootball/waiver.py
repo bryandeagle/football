@@ -59,7 +59,7 @@ def _waiver_moves(ranks, avail, position, to_drop):
 
 def waiver():
     # Initial configuration
-    config = yaml.load(open(CONFIG_FILE, 'r'))
+    config = yaml.load(open(CONFIG_FILE, 'r'), Loader=yaml.SafeLoader)
     mail = Email(config['email'])
 
     try:
