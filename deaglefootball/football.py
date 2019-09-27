@@ -3,7 +3,7 @@ from ff_espn_api import League
 from datetime import datetime
 import requests
 
-CONFIG_FILE = 'config.yaml'
+CONFIG_FILE = os.path.join((os.path.dirname(os.path.realpath(__file__)), 'config.yaml')
 
 
 class Email:
