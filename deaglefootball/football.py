@@ -2,8 +2,10 @@ from bs4 import BeautifulSoup
 from ff_espn_api import League
 from datetime import datetime
 import requests
+import os
 
-CONFIG_FILE = os.path.join((os.path.dirname(os.path.realpath(__file__)), 'config.yaml')
+
+CONFIG_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yaml')
 
 
 class Email:
