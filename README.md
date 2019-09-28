@@ -10,7 +10,6 @@ if [ ! -d "env" ]; then
 fi
 source env/bin/activate
 pip install -r requirements.txt
-python lineup.py
 ```
 
 ## Deploying
