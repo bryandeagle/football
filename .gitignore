@@ -103,8 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# configuration
-config.yaml
+# result
+result.html
 
 # Pycharm
 .idea/
