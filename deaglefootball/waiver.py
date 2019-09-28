@@ -1,7 +1,8 @@
-from .football import Football, Email, CONFIG_FILE
+from .football import Football, Email, CONFIG_FILE, THIS_DIR
 from datetime import datetime
 from jinja2 import Template
 import yaml
+import os
 
 
 class Moves:
@@ -20,7 +21,7 @@ class Moves:
         self.weekly_moves += movelist
 
     def render(self, league_id, year, team_id):
-        t = Template(open('templates/waiver.html', 'r',  encoding='utf-8').read())
+        t = Template(open(os.path.join(THIS_DIR, 'templates/waiver.html'), 'r',  encoding='utf-8').read())
         return t.render(moves=self.sorted(), league_id=league_id, year=year, team_id=team_id)
 
     def __repr__(self):
@@ -62,36 +63,26 @@ def waiver():
     config = yaml.load(open(CONFIG_FILE, 'r'), Loader=yaml.SafeLoader)
     mail = Email(config['email'])
 
-    try:
-        # Initialize API and move list
-        football = Football(config['football'])
-        moves = Moves()
+    # Initialize API and move list
+    football = Football(config['football'])
+    moves = Moves()
 
-        # Waiver RBs and WRs
-        for pos in ['RB', 'WR']:
-            available = football.get_espn_players(pos)
-            rankings = football.get_fpros_rankings(pos, 'season')
-            for player in football.get_espn_roster(pos):
-                moves.add_season(_waiver_moves(rankings, available, pos, player))
+    # Waiver RBs and WRs
+    for pos in ['RB', 'WR']:
+        available = football.get_espn_players(pos)
+        rankings = football.get_fpros_rankings(pos, 'season')
+        for player in football.get_espn_roster(pos):
+            moves.add_season(_waiver_moves(rankings, available, pos, player))
 
-        # Stream Players
-        for pos in ['QB', 'TE', 'K', 'DST']:
-            player = football.get_espn_roster(pos)[0]
-            available = football.get_espn_players(pos)
-            rankings = football.get_fpros_rankings(pos, 'week')
-            moves.add_weekly(_waiver_moves(rankings, available, pos, player)[:football.league_size])
+    # Stream Players
+    for pos in ['QB', 'TE', 'K', 'DST']:
+        player = football.get_espn_roster(pos)[0]
+        available = football.get_espn_players(pos)
+        rankings = football.get_fpros_rankings(pos, 'week')
+        moves.add_weekly(_waiver_moves(rankings, available, pos, player)[:football.league_size])
 
-        # Send action email
-        rendered = moves.render(league_id=football.league_id,
-                                year=datetime.today().year,
-                                team_id=football.team_id)
-        mail.send(subject=config['waiver']['subject'], html=rendered)
-
-    except Exception as e:
-        # Send error email
-        mail.send(subject='An Error Occurred', html=str(e))
-        raise e
-
-
-if __name__ == '__main__':
-    waiver()
+    # Send action email
+    rendered = moves.render(league_id=football.league_id,
+                            year=datetime.today().year,
+                            team_id=football.team_id)
+    mail.send(subject=config['waiver']['subject'], html=rendered)

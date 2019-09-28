@@ -4,8 +4,8 @@ from datetime import datetime
 import requests
 import os
 
-
-CONFIG_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yaml')
+THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+CONFIG_FILE = os.path.join(THIS_DIR, 'config.yaml')
 
 
 class Email:
