@@ -1,0 +1,5 @@
+ff-espn-api
+requests
+jinja2
+pyyaml
+bs4

@@ -4,38 +4,24 @@ from datetime import datetime
 import requests
 import os
 
+
+LEAGUE_ID = 1752514
+TEAM_NAME = 'Chilladelphia Deagles'
 THIS_DIR = os.path.dirname(os.path.realpath(__file__))
-CONFIG_FILE = os.path.join(THIS_DIR, 'config.yaml')
-
-
-class Email:
-    def __init__(self, config):
-        self.url = config['mg_url']
-        self.api_key = config['api_key']
-        self.to = config['to']
-        self.from_addr = config['from']
-
-    def send(self, subject, html):
-        return requests.post(self.url,
-                             auth=('api', self.api_key),
-                             data={'from': self.from_addr,
-                                   'to': [self.to],
-                                   'subject': '{} 🏈'.format(subject),
-                                   'html': html})
 
 
 class Football:
-    def __init__(self, config):
-        self.league_id = config['league_id']
+    def __init__(self):
+        self.league_id = LEAGUE_ID
         self.team_id = 0
-        self.league = League(league_id=config['league_id'],
+        self.league = League(league_id=LEAGUE_ID,
                              year=datetime.today().year,
-                             espn_s2=config['espn_s2'],
-                             swid=config['swid'])
+                             espn_s2=os.getenv('ESPN_S2'),
+                             swid=os.getenv('SWID'))
         all_teams = self.league.standings()
         self.league_size = len(all_teams)
         for team in all_teams:
-            if team.team_name == config['team_name']:
+            if team.team_name == TEAM_NAME:
                 self.team_id = team.team_id
                 break
 

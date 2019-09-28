@@ -1,8 +1,9 @@
-from .football import Football, Email, CONFIG_FILE, THIS_DIR
+from football import Football
 from datetime import datetime
 from jinja2 import Template
-import yaml
 import os
+
+THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 class Moves:
@@ -58,13 +59,9 @@ def _waiver_moves(ranks, avail, position, to_drop):
     return drops
 
 
-def waiver():
-    # Initial configuration
-    config = yaml.load(open(CONFIG_FILE, 'r'), Loader=yaml.SafeLoader)
-    mail = Email(config['email'])
-
+def waiver(directory):
     # Initialize API and move list
-    football = Football(config['football'])
+    football = Football()
     moves = Moves()
 
     # Waiver RBs and WRs
@@ -81,8 +78,14 @@ def waiver():
         rankings = football.get_fpros_rankings(pos, 'week')
         moves.add_weekly(_waiver_moves(rankings, available, pos, player)[:football.league_size])
 
-    # Send action email
+    # Render email
     rendered = moves.render(league_id=football.league_id,
                             year=datetime.today().year,
                             team_id=football.team_id)
-    mail.send(subject=config['waiver']['subject'], html=rendered)
+    with open(os.path.join(directory, 'result.html'), 'wt', encoding='utf-8') as f:
+        f.write(rendered)
+    print('done')
+
+
+if __name__ == '__main__':
+    waiver(THIS_DIR)

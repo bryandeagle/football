@@ -1,7 +1,8 @@
-from .football import Football, Email, CONFIG_FILE, THIS_DIR
+from football import Football
 from jinja2 import Template
-import yaml
 import os
+
+THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 class Lineup:
@@ -29,12 +30,9 @@ class Lineup:
                     self.TE, self.K, self.DST)
 
 
-def lineup():
-    # Initialize API and lineup list
-    config = yaml.load(open(CONFIG_FILE, 'r'), Loader=yaml.SafeLoader)
-    mail = Email(config['email'])
-
-    football = Football(config['football'])
+def lineup(directory):
+    # Initialize API
+    football = Football()
     line_up = Lineup()
 
     # Get flex rankings from fantasy pros
@@ -67,6 +65,12 @@ def lineup():
     flex_sorted = sorted(flex_ranked, key=lambda p: p['rank'])
     line_up.FLX = flex_sorted[0]['player']
 
-    # Send action email
+    # Render email
     rendered = line_up.render(football.team_id, football.league_id)
-    mail.send(subject=config['lineup']['subject'], html=rendered)
+    with open(os.path.join(directory, 'result.html'), 'wt', encoding='utf-8') as f:
+        f.write(rendered)
+    print('done')
+
+
+if __name__ == '__main__':
+    lineup(THIS_DIR)
