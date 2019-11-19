@@ -12,8 +12,8 @@ class Moves:
         self.weekly_moves = list()
 
     def sorted(self):
-        return sorted(self.season_moves, key=lambda m: m.delta, reverse=True) + \
-               sorted(self.weekly_moves, key=lambda m: m.delta, reverse=True)
+        return sorted(self.season_moves, key=lambda m: m.drop.playerId, reverse=True) + \
+               sorted(self.weekly_moves, key=lambda m: m.drop.playerId, reverse=True)
 
     def add_season(self, movelist):
         self.season_moves += movelist
