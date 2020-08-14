@@ -1,5 +1,5 @@
-# football
-Fantasy Football Auto Pilot
+# Fantasy Football Auto Pilot
+This tool sends me a well-formatted email informing me which waivers to choose, and how to set my line-up
 
 ## Installing
 ```
@@ -19,6 +19,5 @@ Run **python lineup.py** or **python waiver.py**
 You can find **ESPN_S2** and **SWID** after logging into your espn fantasy football account on espn's website. Then right click anywhere on the website and click inspect option. From there click Application on the top bar. On the left under Storage section click Cookies then http://fantasy.espn.com. From there you should be able to find your swid and espn_s2 variables and values.
 
 ### Automated Running
-waiver.py should be run every Tuesday at 6:00 AM.
-
+waiver.py should be run every Tuesday at 6:00 AM.  
 lineup.py should be run every Wednesday at 6:00 AM.
