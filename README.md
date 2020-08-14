@@ -1,4 +1,4 @@
-# Fantasy Football Auto Pilot 🏈
+# 🏈Fantasy Football Auto Pilot
 This tool sends me a well-formatted email informing me which waivers to choose, and how to set my line-up
 
 ## Installing
