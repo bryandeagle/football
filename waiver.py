@@ -1,32 +1,55 @@
 from football import Football
-from datetime import datetime
-from jinja2 import Template
-import os
-
-THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-class Moves:
-    def __init__(self):
-        self.season_moves = list()
-        self.weekly_moves = list()
+class Team:
+    def __init__(self, roster):
+        self.roster = roster
 
-    def sorted(self):
-        return sorted(self.season_moves, key=lambda m: m.drop.playerId, reverse=True) + \
-               sorted(self.weekly_moves, key=lambda m: m.drop.playerId, reverse=True)
+        # Capture team slots. Format: (week, season)
+        self.slots = {'QB': (1, 1), 'RB': (1, 4), 'WR': (1, 4),
+                      'TE': (1, 1), 'DST': (1, 0), 'K': (1, 0)}
 
-    def add_season(self, movelist):
-        self.season_moves += movelist
+        # Validate slots can be filled
+        # self._validate()  # disabled
 
-    def add_weekly(self, movelist):
-        self.weekly_moves += movelist
+        # Put kicker and DST into slots
+        self.week = {'DST': roster['DST'], 'K': roster['K']}
+        self.season = {'DST': [], 'K': []}
 
-    def render(self, league_id, year, team_id):
-        t = Template(open(os.path.join(THIS_DIR, 'templates/waiver.html'), 'r',  encoding='utf-8').read())
-        return t.render(moves=self.sorted(), league_id=league_id, year=year, team_id=team_id)
+        # Put Running Backs into slots
+        for pos in ['RB', 'WR', 'QB', 'TE']:
+            players = sorted(self.roster[pos], key=lambda p: p.projection['season'], reverse=True)
+            self.season[pos] = players[:self.slots[pos][1]]
+            self.week[pos] = players[self.slots[pos][1]:]
+
+    def _validate(self):
+        for pos in self.roster.keys():
+            found = len(self.roster[pos])
+            need = sum(self.slots[pos])
+            if found != need:
+                raise ValueError('Found {} {}(s). Need {}.'.format(found, pos, need))
 
     def __repr__(self):
-        return '\n'.join([str(m) for m in self.sorted()])
+        max_len = 0  # Loop through players to get max length
+        for pos in ['QB', 'RB', 'WR', 'TE', 'DST', 'K']:
+            for player in self.season[pos] + self.week[pos]:
+                if len(player.name) > max_len:
+                    max_len = len(player.name)
+
+        string = '┌──────┬────────┬─' + '─' * max_len + '─┬───────┐\n'
+        for pos in ['QB', 'RB', 'WR', 'TE', 'DST']:
+            for player in self.season[pos]:
+                proj = '{:.2f}'.format(player.projection['season'])
+                string += '│ {:<4} │ Season │ {:<{}} │ {} │\n'\
+                    .format(pos, player.name, max_len, proj.zfill(5))
+            for player in self.week[pos]:
+                proj = '{:.2f}'.format(player.projection['week'])
+                string += '│ {:<4} │ Week   │ {:<{}} │ {} │\n'\
+                    .format(pos, player.name, max_len, proj.zfill(5))
+            string += '├──────┼────────┼──' + '─' * max_len + '┼───────┤\n'
+        proj = '{:.2f}'.format(self.week['K'][0].projection['week']).zfill(5)
+        string += '│ K    │ Week   │ {:<{}} │ {} |\n'.format(self.week['K'][0].name, max_len, proj)
+        return string + '└──────┴────────┴─' + '─' * max_len + '─┴───────┘\n'
 
 
 class Move:
@@ -37,10 +60,8 @@ class Move:
         self.delta = delta
 
     def __repr__(self):
-        return 'Drop {} {} for {} for +{} rank.'.format(self.position,
-                                                        self.drop,
-                                                        self.add,
-                                                        self.delta)
+        return 'Drop {} {} for {} for +{} pts.'\
+            .format(self.position, self.drop, self.add, self.delta)
 
 
 def _waiver_moves(ranks, avail, position, to_drop):
@@ -59,33 +80,8 @@ def _waiver_moves(ranks, avail, position, to_drop):
     return drops
 
 
-def waiver(directory):
+if __name__ == '__main__':
     # Initialize API and move list
     football = Football()
-    moves = Moves()
-
-    # Waiver RBs and WRs
-    for pos in ['RB', 'WR']:
-        available = football.get_espn_players(pos)
-        rankings = football.get_fpros_rankings(pos, 'season')
-        for player in football.get_espn_roster(pos):
-            moves.add_season(_waiver_moves(rankings, available, pos, player))
-
-    # Stream Players
-    for pos in ['QB', 'TE', 'K', 'DST']:
-        player = football.get_espn_roster(pos)[0]
-        available = football.get_espn_players(pos)
-        rankings = football.get_fpros_rankings(pos, 'week')
-        moves.add_weekly(_waiver_moves(rankings, available, pos, player)[:football.league_size])
-
-    # Render email
-    rendered = moves.render(league_id=football.league_id,
-                            year=datetime.today().year,
-                            team_id=football.team_id)
-    with open(os.path.join(directory, 'result.html'), 'wt', encoding='utf-8') as f:
-        f.write(rendered)
-    print('done')
-
-
-if __name__ == '__main__':
-    waiver(THIS_DIR)
+    team = Team(football.roster)
+    print(team)

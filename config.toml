@@ -1,0 +1,86 @@
+[general]
+league_id = 1752514
+owner = 'Bryan Deagle'
+start_week = '2020-09-07'
+
+[espn_scoring]
+pass_yards     = 0.04
+pass_tds       = 4
+pass_ints      = -2
+two_pt_conv    = 2
+rush_yards     = 0.1
+rush_tds       = 6
+fumbles        = -2
+receptions     = 1
+rec_yards      = 0.1
+rec_tds        = 6
+extra_points   = 1
+field_goals    = 4
+def_sacks      = 1
+def_ints       = 2
+fumbles_rec    = 2
+def_tds        = 6
+safety         = 2
+
+[points_allowed]
+0   = 5
+7   = 4
+14  = 3
+18  = 1
+28  = 0
+35  = -1
+46  = -3
+200 = -7
+
+[yards_allowed]
+100  = 5
+200  = 3
+300  = 2
+350  = 0
+400  = -1
+450  = -3
+500  = -5
+550  = -6
+1000 = -7
+
+[fantasy_pros]
+QB  = ['', '', 'pass_yards', 'pass_tds', 'pass_ints', '', 'rush_yards', 'rush_tds', 'fumbles']
+RB  = ['', 'rush_yards', 'rush_tds', 'receptions', 'rec_yards', 'rec_tds', 'fumbles']
+WR  = ['receptions', 'rec_yards', 'rec_tds', '', 'rush_yards', 'rush_tds', 'fumbles']
+TE  = ['receptions', 'rec_yards', 'rec_tds', 'fumbles']
+K   = ['field_goals', '', 'extra_points']
+DST = ['def_sacks', 'def_ints', 'fumbles_rec', '', 'def_tds', 'safety', 'points_allowed', 'yards_allowed']
+
+[custom_ids]
+Buffalo_Bills            = 'bufdstbills'
+San_Francisco_49ers      = 'sfdst49ers'
+Arizona_Cardinals        = 'aridstcardinals'
+Kansas_City_Chiefs       = 'kcdstchiefs'
+Tampa_Bay_Buccaneers     = 'tbdstbuccaneers'
+Cleveland_Browns         = 'cledstbrowns'
+Chicago_Bears            = 'chidstbears'
+Pittsburgh_Steelers      = 'pitdststeelers'
+Tennessee_Titans         = 'tendsttitans'
+Baltimore_Ravens         = 'baldstravens'
+New_England_Patriots     = 'nedstpatriots'
+Los_Angeles_Rams         = 'lardstrams'
+Washington_Football_Team = 'wshdstwashington'
+Dallas_Cowboys           = 'daldstcowboys'
+Cincinnati_Bengals       = 'cindstbengals'
+Jacksonville_Jaguars     = 'jaxdstjaguars'
+Green_Bay_Packers        = 'gbdstpackers'
+Miami_Dolphins           = 'miadstdolphins'
+Indianapolis_Colts       = 'inddstcolts'
+New_York_Jets            = 'nyjdstjets'
+New_Orleans_Saints       = 'nodstsaints'
+Minnesota_Vikings        = 'mindstvikings'
+Seattle_Seahawks         = 'seadstseahawks'
+Philadelphia_Eagles      = 'phidsteagles'
+New_York_Giants          = 'nygdstgiants'
+Carolina_Panthers        = 'cardstpanthers'
+Denver_Broncos           = 'dendstbroncos'
+Houston_Texans           = 'houdsttexans'
+Atlanta_Falcons          = 'atldstfalcons'
+Detroit_Lions            = 'detdstlions'
+Los_Angeles_Chargers     = 'lacdstchargers'
+Las_Vegas_Raiders        = 'oakdstraiders'

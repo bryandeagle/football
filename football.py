@@ -1,72 +1,123 @@
-from bs4 import BeautifulSoup
 from ff_espn_api import League
+from bs4 import BeautifulSoup
 from datetime import datetime
 import requests
+import toml
 import os
+import re
 
 
-LEAGUE_ID = 1752514
-TEAM_NAME = 'Chilladelphia Deagles'
-THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+def _create_id(name, team, position, custom_ids=None):
+    if custom_ids and name.replace(' ', '_') in custom_ids:
+        return custom_ids[name.replace(' ', '_')]
+    name = re.sub(r'(\sI{2,})|(Jr\.?)|(D/?ST)$', '', name)
+    pid = '{}{}{}'.format(team.lower(), position.lower(), name.lower())
+    return re.compile('[^a-z]').sub('', pid)
+
+
+class Player:
+    def __init__(self, espn_player):
+        self.name = espn_player.name
+        self.espn_id = espn_player.playerId
+        self.position = re.compile('[^A-Z]').sub('', espn_player.position)
+        self.team = espn_player.proTeam
+        self.projection = {'week': 0, 'season': 0}
+        self.id = _create_id(self.name, self.team, self.position)
+
+    def __repr__(self):
+        return self.name
 
 
 class Football:
     def __init__(self):
-        self.league_id = LEAGUE_ID
-        self.team_id = 0
-        self.league = League(league_id=LEAGUE_ID,
+        # Read config.toml file
+        this_dir = os.path.dirname(os.path.realpath(__file__))
+        with open(os.path.join(this_dir, 'config.toml')) as f:
+            self.config = toml.loads(f.read())
+
+        # Get required ESPN environment variables
+        swid, espn_s2 = os.getenv('SWID'), os.getenv('ESPN_S2')
+        if not swid:
+            raise ValueError('SWID environment variable not set')
+        elif not espn_s2:
+            raise ValueError('ESPN_S2 environment variable not set')
+
+        # Get the current week number
+        week_one = datetime.strptime(self.config['general']['start_week'], '%Y-%m-%d')
+        self._week = int(datetime.today().strftime('%W')) - int(week_one.strftime('%W')) + 1
+
+        # Initiatlize ESPN league API
+        self.league = League(league_id=self.config['general']['league_id'],
                              year=datetime.today().year,
-                             espn_s2=os.getenv('ESPN_S2'),
-                             swid=os.getenv('SWID'))
-        all_teams = self.league.standings()
-        self.league_size = len(all_teams)
-        for team in all_teams:
-            if team.team_name == TEAM_NAME:
-                self.team_id = team.team_id
+                             espn_s2=espn_s2,
+                             swid=swid)
+        # Get my team ID
+        for team in self.league.standings():
+            if team.owner == self.config['general']['owner']:
+                self._team_id = team.team_id
                 break
 
-    @staticmethod
-    def _sanitize_players(players):
-        for p in players:
-            if p.position == 'D/ST':
-                p.name = p.name.replace(' D/ST', '')
-                p.position = 'DST'
-            else:
-                p.name = p.name.replace('.', '')
-        return players
+        # Get stats from fantasy pros
+        self.stats = {'week': {}, 'season': {}}
+        for time in ['week', 'season']:
+            for pos in ['QB', 'RB', 'WR', 'TE', 'K', 'DST']:
+                self.stats[time] = {**self.stats[time], **self.get_stats(pos, self._week)}
 
-    def get_espn_roster(self, position):
-        if position == 'DST':
-            position = 'D/ST'
-        players = self.league.get_team_data(self.team_id).roster
-        position_players = [p for p in players if p.position == position]
-        return self._sanitize_players(position_players)
+        # Calculate projections from ESPN settings
+        self.projections = {'week': {}, 'season': {}}
+        for time in ['week', 'season']:
+            for player in self.stats[time]:
+                self.projections[time][player] = self.calc_score(player, time)
 
-    def get_espn_players(self, position):
-        if position == 'DST':
-            position = 'D/ST'
-        free_agents = self.league.free_agents(week=None, size=1000, position=position)
-        return self._sanitize_players(free_agents)
+        # Get team roster
+        self.roster = {'QB': [], 'RB': [], 'WR': [], 'TE': [], 'K': [], 'DST': []}
+        for p in self.league.get_team_data(self._team_id).roster:
+            player = Player(p)
+            player.projection['week'] = self.calc_score(player.id, 'week')
+            player.projection['season'] = self.calc_score(player.id, 'season')
+            self.roster[player.position].append(player)
 
-    @staticmethod
-    def get_fpros_rankings(position, time):
-        """ Scrapes ranking data from Fantasy Pros """
-        if position in ['RB', 'WR', 'TE', 'FLEX']:
-            position = 'PPR-{}'.format(position)
-        if time == 'week':
-            url = '{}.php?week={}'.format(position, datetime.today().isocalendar()[1] - 35)
-        elif time == 'season':
-            url = 'ros-{}.php?year={}'.format(position, datetime.today().year)
-        else:
-            raise ValueError('Valid times are week and season.')
-        page = requests.get('{}/{}'.format('https://www.fantasypros.com/nfl/rankings', url.lower()))
+    def get_stats(self, position, week):
+        url = 'https://www.fantasypros.com/nfl/projections'
+        page = requests.get('{}/{}.php?week={}'.format(url, position.lower(), week))
         soup = BeautifulSoup(page.content, 'html.parser')
-        table = soup.find('table', id='rank-data').find('tbody')
-        players = list()
-        for row in table.findAll('tr', {'class': 'player-row'}):
-            name = row.find('a', {'class': 'fp-player-link'})['fp-player-name'].replace('.', '')
-            if position == 'DST':
-                players.append(name.split(' ')[-1])
+        table = soup.find('table', id='data').find('tbody')
+        stats = dict()
+        for row in table.findAll('tr'):
+            # Get player information
+            columns = row.find_all('td')
+            name = columns[0].find('a', {'class': 'player-name'}).text
+            team = columns[0].find_all(text=True)[1]
+
+            stat = dict()
+            for i, cell in enumerate(columns[1:-1]):
+                col = self.config['fantasy_pros'][position][i]
+                if col != '':
+                    stat[col] = float(cell.contents[0])
+            stats[_create_id(name, team, position, self.config['custom_ids'])] = stat
+        return stats
+
+    def calc_score(self, player, time):
+        if player not in self.stats[time]:
+            raise ValueError('Unknown Player: {}'.format(player))
+        score = 0
+        for item in self.stats[time][player]:
+            if item in self.config['espn_scoring']:
+                score += self.stats[time][player][item] * self.config['espn_scoring'][item]
+            elif item in ['points_allowed', 'yards_allowed']:
+                for v in self.config[item]:
+                    if self.stats[time][player][item] < int(v):
+                        score += self.config[item][v]
+                        break
             else:
-                players.append(name)
-        return players
+                raise ValueError('Unknown stat: {}'.format(item))
+        return score
+
+    def free_agents(self, position):
+        agents = []
+        for p in self.league.free_agents(week=None, size=1000, position=position):
+            player = Player(p)
+            player.projection['week'] = self.calc_score(player.id, 'week')
+            player.projection['season'] = self.calc_score(player.id, 'season')
+            agents.append(player)
+        return agents

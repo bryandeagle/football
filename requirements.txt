@@ -2,4 +2,5 @@ ff-espn-api
 requests
 jinja2
 pyyaml
+toml
 bs4
