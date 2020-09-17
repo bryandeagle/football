@@ -2,22 +2,26 @@ from football import Football
 
 
 def print_lineup(line_up):
+    """ Prints the lineup in a nice fancy way """
     max_len = 0  # Loop through players to get max length
     for pos in line_up:
         if len(line_up[pos].name) > max_len:
             max_len = len(line_up[pos].name)
-
+    # Print fancy box containing line-up
     print('┌──────┬─' + '─' * max_len + '─┬───────┐')
     print('│ POS  │ {:<{}} │ PTS   │'.format('Player', max_len))
     print('├──────┼─' + '─' * max_len + '─┼───────┤')
     for pos in ['QB', 'RB1', 'RB2', 'WR1', 'WR2', 'FLX', 'TE', 'K', 'DST']:
-        name = line_up[pos].name
-        pts = '{:.2f}'.format(line_up[pos].projection['week'])
-        print('│ {:<4} │ {:<{}} │ {} │'.format(pos, name, max_len, pts.zfill(5)))
+        pts = '{:.2f}'.format(line_up[pos].projection['week']).zfill(5)
+        print('│ {:<4} │ {:<{}} │ {} │'.format(pos,
+                                               line_up[pos].name,
+                                               max_len,
+                                               pts))
     print('└──────┴─' + '─' * max_len + '─┴───────┘')
 
 
 if __name__ == '__main__':
+
     # Initialize API and roster with trivial positions
     football = Football()
     lineup = {'K': football.roster['K'][0],
