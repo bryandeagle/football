@@ -3,8 +3,6 @@ This tool sends me a well-formatted email informing me which waivers to choose, 
 
 ## Installing
 ```
-export SWID=''
-export ESPN_S2=''
 if [ ! -d "env" ]; then
         python3 -m venv env
 fi
@@ -13,6 +11,14 @@ pip install -r requirements.txt
 ```
 
 ## Deploying
+Create **secrets.json** with the following format
+```
+{
+  "swid":  "",
+  "espn_s2":  ""
+}
+```
+
 Run **python lineup.py** or **python waiver.py**
 
 ### Configuration
