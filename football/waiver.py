@@ -5,11 +5,9 @@ class Team:
     def __init__(self, roster):
         self.roster = roster
 
-        # Capture team slots. Format: (week, season)
-        self.slots = {'QB': (1, 1), 'RB': (1, 4), 'WR': (1, 4),
-                      'TE': (1, 1), 'DST': (1, 0), 'K': (1, 0)}
-
         # Validate slots can be filled
+        self._slots = {'QB': (1, 1), 'RB': (1, 4), 'WR': (1, 4),
+                       'TE': (1, 1), 'DST': (1, 0), 'K': (1, 0)}
         self._validate()
 
         # Put kicker and DST into slots
@@ -21,13 +19,13 @@ class Team:
             players = sorted(self.roster[pos],
                              key=lambda p: p.projection['season'],
                              reverse=True)
-            self.season[pos] = players[:self.slots[pos][1]]
-            self.week[pos] = players[self.slots[pos][1]:]
+            self.season[pos] = players[:self._slots[pos][1]]
+            self.week[pos] = players[self._slots[pos][1]:]
 
     def _validate(self):
         for position in self.roster.keys():
             found = len(self.roster[position])
-            need = sum(self.slots[position])
+            need = sum(self._slots[position])
             if found != need:
                 raise ValueError('Found {} {}(s). Need {}.'
                                  .format(found, position, need))
@@ -39,25 +37,30 @@ class Team:
                 if len(player.name) > max_len:
                     max_len = len(player.name)
 
-        string = '┌──────┬────────┬─' + '─' * max_len + '─┬────────┬───────┐\n' \
-                 '│ POS  │ SLOT   │ {:<{}} │ SEASON │ WEEK  │\n'.format('NAME', max_len)
-        string += '├──────┼────────┼──' + '─' * max_len + '┼────────┼───────┤\n'
+        string = '┌──────┬────────┬─' + '─' * max_len + '─┬────────┬───────┐' \
+                 '\n│ POS  │ SLOT   │ {:<{}} │ SEASON │ WEEK  │\n├──────┼───' \
+                 '─────┼──'.format('NAME', max_len) + '─' * max_len + '┼────' \
+                 '────┼───────┤\n'
         for pos in ['QB', 'RB', 'WR', 'TE', 'DST']:
             for player in self.season[pos]:
-                week = '{:.2f}'.format(player.projection['week'])
+                week = '{:.2f}'.format(player.projection['week']).zfill(5)
                 season = '{:.2f}'.format(player.projection['season'])
                 string += '│ {:<4} │ Season │ {:<{}} │ {} │ {} │\n'\
-                    .format(pos, player.name, max_len, season.zfill(6), week.zfill(5))
+                    .format(pos, player.name, max_len, season.zfill(6), week)
             for player in self.week[pos]:
-                week = '{:.2f}'.format(player.projection['week'])
+                week = '{:.2f}'.format(player.projection['week']).zfill(5)
                 season = '{:.2f}'.format(player.projection['season'])
                 string += '│ {:<4} │ Week   │ {:<{}} │ {} │ {} │\n'\
-                    .format(pos, player.name, max_len, season.zfill(6), week.zfill(5))
-            string += '├──────┼────────┼──' + '─' * max_len + '┼────────┼───────┤\n'
-        week = '{:.2f}'.format(self.week['K'][0].projection['week']).zfill(5)
-        season = '{:.2f}'.format(self.week['K'][0].projection['season']).zfill(6)
-        string += '│ K    │ Week   │ {:<{}} │ {} | {} |\n'.format(self.week['K'][0].name, max_len, season, week)
-        return string + '└──────┴────────┴─' + '─' * max_len + '─┴────────┴───────┘\n'
+                    .format(pos, player.name, max_len, season.zfill(6), week)
+            string += '├──────┼────────┼──' + '─' * \
+                      max_len + '┼────────┼───────┤\n'
+        week = '{:.2f}'.format(self.week['K'][0].projection['week'])
+        season = '{:.2f}'.format(self.week['K'][0].projection['season'])
+        string += '│ K    │ Week   │ {:<{}} │ {} | {} |\n' \
+                  .format(self.week['K'][0].name, max_len,
+                          season.zfill(6), week.zfill(5))
+        return string + '└──────┴────────┴─' + '─' * max_len + \
+            '─┴────────┴───────┘\n'
 
 
 class Move:
@@ -89,13 +92,28 @@ def _waiver_moves(ranks, avail, position, to_drop):
 
 
 if __name__ == '__main__':
-    football = Football()
+    football = Football(debug=False)
     team = Team(football.roster)
-    free_agents = football.free_agents('DST')
 
-    #for time in team.season:
-    #    for pos in ['WR', 'RB', 'QB', 'TE', 'DST', 'K']:
-    #        free_agents = football.free_agents(pos)
-    #        for player in team.season[pos]:
-    #            fa_better = [p for p in free_agents if p.projection[time] > player.projection[time]]
-    #            print('{}:{}'.format(player, fa_better))
+    print(team)
+    quit()
+
+    # Get season moves
+    for pos in ['WR', 'RB', 'TE', 'QB', 'DST', 'K']:
+        free_agents = football.free_agents(pos)
+        for player in team.season[pos]:
+            fa_better = [p for p in free_agents
+                         if p.projection['season'] >
+                         player.projection['season']]
+            if fa_better:
+                print('Season:{}:{}'.format(player, fa_better))
+
+    # Get weekly moves
+    for pos in ['WR', 'RB', 'TE', 'QB', 'DST', 'K']:
+        free_agents = football.free_agents(pos)
+        for player in team.week[pos]:
+            fa_better = [p for p in free_agents
+                         if p.projection['week'] >
+                         player.projection['week']]
+            if fa_better:
+                print('Season:{}:{}'.format(player, fa_better))
