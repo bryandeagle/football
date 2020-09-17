@@ -75,45 +75,28 @@ class Move:
             .format(self.position, self.drop, self.add, self.delta)
 
 
-def _waiver_moves(ranks, avail, position, to_drop):
-    """ Returns list of moves for players better than given """
-    if to_drop.name in ranks:
-        current_rank = ranks.index(to_drop.name)
-    else:
-        current_rank = 200
-    avail_names = [p.name for p in avail]
-    drops = list()
-    for rank, add in enumerate(ranks[:current_rank]):
-        if add in avail_names:
-            add_player = avail[avail_names.index(add)]
-            drops.append(Move(drop=to_drop, add=add_player,
-                              position=position, delta=current_rank - rank))
-    return drops
-
-
 if __name__ == '__main__':
     football = Football(debug=False)
     team = Team(football.roster)
-
     print(team)
-    quit()
-
+    
     # Get season moves
     for pos in ['WR', 'RB', 'TE', 'QB', 'DST', 'K']:
         free_agents = football.free_agents(pos)
         for player in team.season[pos]:
-            fa_better = [p for p in free_agents
-                         if p.projection['season'] >
-                         player.projection['season']]
-            if fa_better:
-                print('Season:{}:{}'.format(player, fa_better))
+            better = [p for p in free_agents
+                      if p.projection['season'] >
+                      player.projection['season']]
+            if better:
+                bp = [(p.name, p.projection['season']) for p in better]
+                print('Season:{} ({}):{}'.format(player, player.projection['season'], bp))
 
     # Get weekly moves
     for pos in ['WR', 'RB', 'TE', 'QB', 'DST', 'K']:
         free_agents = football.free_agents(pos)
         for player in team.week[pos]:
-            fa_better = [p for p in free_agents
-                         if p.projection['week'] >
-                         player.projection['week']]
-            if fa_better:
-                print('Season:{}:{}'.format(player, fa_better))
+            better = [p for p in free_agents
+                      if p.projection['week'] >
+                      player.projection['week']]
+            if better:
+                print('Week:{}:{}'.format(player, better))
