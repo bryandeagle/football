@@ -108,3 +108,9 @@ result.html
 
 # Pycharm
 .idea/
+
+# VSCode
+.vscode/
+
+# Secrets
+secrets.json
