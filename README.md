@@ -19,11 +19,11 @@ Create **secrets.json** with the following format
 }
 ```
 
-Run **python lineup.py** or **python waiver.py**
-
-### Configuration
 You can find **ESPN_S2** and **SWID** after logging into your espn fantasy football account on espn's website. Then right click anywhere on the website and click inspect option. From there click Application on the top bar. On the left under Storage section click Cookies then http://fantasy.espn.com. From there you should be able to find your swid and espn_s2 variables and values.
 
-### Automated Running
+### Running
+
+Run **python lineup.py** or **python waiver.py**
+
 waiver.py should be run every Tuesday at 6:00 AM.  
 lineup.py should be run every Wednesday at 6:00 AM.
