@@ -79,7 +79,7 @@ if __name__ == '__main__':
     football = Football(debug=False)
     team = Team(football.roster)
     print(team)
-    
+
     # Get season moves
     for pos in ['WR', 'RB', 'TE', 'QB', 'DST', 'K']:
         free_agents = football.free_agents(pos)
@@ -88,8 +88,7 @@ if __name__ == '__main__':
                       if p.projection['season'] >
                       player.projection['season']]
             if better:
-                bp = [(p.name, p.projection['season']) for p in better]
-                print('Season:{} ({}):{}'.format(player, player.projection['season'], bp))
+                print('Season:{}:{}'.format(player, better))
 
     # Get weekly moves
     for pos in ['WR', 'RB', 'TE', 'QB', 'DST', 'K']:
