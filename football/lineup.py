@@ -1,4 +1,4 @@
-from football import Football
+from ffn import Football
 
 
 def print_lineup(line_up):
@@ -24,23 +24,23 @@ if __name__ == '__main__':
 
     # Initialize API and roster with trivial positions
     football = Football()
-    lineup = {'K': football.roster['K'][0],
-              'DST': football.roster['DST'][0]}
+    lineup = {'K': football.roster_by_pos('K')[0],
+              'DST': football.roster_by_pos('DST')[0]}
 
     # Fill in QB and TE positions
-    qbs = sorted(football.roster['QB'], key=lambda p: p.projection['week'])
-    tes = sorted(football.roster['TE'], key=lambda p: p.projection['week'])
+    qbs = sorted(football.roster_by_pos('QB'), key=lambda p: p['weekScore'])
+    tes = sorted(football.roster_by_pos('TE'), key=lambda p: p['weekScore'])
     lineup['QB'], lineup['TE'] = qbs.pop(), tes.pop()
 
     # Fill in RB and WR positions
-    rbs = sorted(football.roster['RB'], key=lambda p: p.projection['week'])
-    wrs = sorted(football.roster['WR'], key=lambda p: p.projection['week'])
+    rbs = sorted(football.roster_by_pos('RB'), key=lambda p: p['weekScore'])
+    wrs = sorted(football.roster_by_pos('WR'), key=lambda p: p['weekScore'])
     lineup['RB1'], lineup['RB2'] = rbs.pop(), rbs.pop()
     lineup['WR1'], lineup['WR2'] = wrs.pop(), wrs.pop()
 
     # Set flex position to WR or RB
     flx_rb, flx_wr = rbs.pop(), wrs.pop()
-    if flx_rb.projection['week'] > flx_wr.projection['week']:
+    if flx_rb['weekScore'] > flx_wr['weekScore']:
         lineup['FLX'] = flx_rb
     else:
         lineup['FLX'] = flx_wr

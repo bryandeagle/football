@@ -15,6 +15,7 @@ class Player:
     def __init__(self, espn_player, player_id, position):
         self.name = espn_player.name
         self.espn_id = espn_player.playerId
+        self.ffn_id = 0
         self.position = re.compile('[^A-Z]').sub('', position)
         self.team = espn_player.proTeam
         self.projection = {'week': 0, 'season': 0}
