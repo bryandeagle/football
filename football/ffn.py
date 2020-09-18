@@ -12,10 +12,12 @@ import re
 
 class Football:
     def __init__(self, debug=False):
-        self._format = 'json'
-        self.discount = 0.9
         self.level = INFO if debug else ERROR
-
+        self.league_id = 1752514
+        self.owner = 'Bryan Deagle'
+        self.start_week = '2020-09-07'
+        self.discount = 0.9
+        
     @cached_property
     def log(self):
         # Create handler
@@ -36,8 +38,7 @@ class Football:
     @cached_property
     def week(self):
         """ Get the NFL week number given the first week """
-        start_week = self.config['general']['start_week']
-        week_dt = datetime.strptime(start_week, '%Y-%m-%d')
+        week_dt = datetime.strptime(self.start_week, '%Y-%m-%d')
         return int(datetime.today().strftime('%W')) \
             - int(week_dt.strftime('%W')) + 1
 
@@ -45,13 +46,13 @@ class Football:
     def espn_team(self):
         """ Get the ESPN team ID """
         for team in self.espn.standings():
-            if team.owner == self.config['general']['owner']:
+            if team.owner == self.owner:
                 return team.team_id
 
     @cached_property
     def espn(self):
         """ The ESPN league object """
-        return League(league_id=self.config['general']['league_id'],
+        return League(league_id=self.league_id,
                       year=datetime.today().year,
                       espn_s2=self.secret['espn_s2'],
                       swid=self.secret['swid'])
@@ -63,13 +64,6 @@ class Football:
             raise ValueError('Secrets file missing')
         with open('secrets.json', 'rt') as f:
             return json.loads(f.read())
-
-    @cached_property
-    def config(self):
-        """ Read the configuration TOML file """
-        this_dir = os.path.dirname(os.path.realpath(__file__))
-        with open(os.path.join(this_dir, 'config.toml')) as f:
-            return toml.loads(f.read())
 
     @cached_property
     def roster(self):
@@ -86,12 +80,12 @@ class Football:
         return [p for p in dict_list if p]
 
     def score(self, stats):
-        """ Calculate score given stats """ 
+        """ Calculate score given stats """
         def dpa(x):
             """ Defense points allowed """
             maps = [(1, 5), (7, 4), (14, 3),
-                   (18, 1), (28, 0), (35, -1),
-                   (46, -3), (200, -7)]
+                    (18, 1), (28, 0), (35, -1),
+                    (46, -3), (200, -7)]
             for v, s in maps:
                 if x < v:
                     return s
@@ -99,12 +93,12 @@ class Football:
         def dya(x):
             """ Defense yards allowed """
             maps = [(100, 5), (200, 3), (300, 2),
-                   (350, 0), (400, -1), (450, -3), 
-                   (500, -5), (550, -6), (1000, -7)]
+                    (350, 0), (400, -1), (450, -3),
+                    (500, -5), (550, -6), (1000, -7)]
             for v, s in maps:
                 if x < v:
                     return s
-        
+
         settings = {'passYds': 0.04,
                     'passTD': 4,
                     'passInt': -2,
@@ -124,7 +118,7 @@ class Football:
                     'defSafety': 2,
                     'defPA': dpa,
                     'defYdsAllowed': dya}
-       
+
         s = 0
         for stat in settings:
             if callable(settings[stat]):
@@ -138,7 +132,6 @@ class Football:
         proj = dict()
         for p in ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']:
             tab = self.nerd('weekly-projections', p, self.week)['Projections']
-            print('RESULTS: {}'.format(len(tab)))
             for row in tab:
                 proj[int(row['playerId'])] = {'week': self.score(row),
                                               'ros': self.score(row)}
@@ -151,13 +144,14 @@ class Football:
 
     def espn_to_dict(self, player):
         """ Convert ESPN Player object to dictionary """
+        position = player.position.replace('/', '')
         global_id = self.get_id(player.name,
-                                player.position,
+                                position,
                                 player.proTeam)
         nerd_id = self.get_nerd_id(global_id)
         if self.get_nerd_id(global_id):
             return {'name': player.name,
-                    'position': player.position,
+                    'position': position,
                     'team': player.proTeam,
                     'espnId': player.playerId,
                     'nerdId': nerd_id,
