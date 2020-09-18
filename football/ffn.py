@@ -38,7 +38,7 @@ class Football:
         if sort:
             return sorted(roster, key=lambda p: p['score'], reverse=True)
         return roster
-        
+
     @cached_property
     def week(self):
         """ Get the NFL week number given the first week """
