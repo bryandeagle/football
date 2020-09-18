@@ -16,8 +16,9 @@ class Football:
         self.league_id = 1752514
         self.owner = 'Bryan Deagle'
         self.start_week = '2020-09-07'
+        self.total_weeks = 13 + 2
         self.discount = 0.9
-        
+
     @cached_property
     def log(self):
         # Create handler
@@ -99,46 +100,36 @@ class Football:
                 if x < v:
                     return s
 
-        settings = {'passYds': 0.04,
-                    'passTD': 4,
-                    'passInt': -2,
-                    'rushYds': 0.1,
-                    'rushTD': 6,
-                    'fumblesLost': -2,
-                    'receptions': 1,
-                    'recYds': 0.1,
-                    'recTD': 6,
-                    'fg': 4,
-                    'xp': 1,
-                    'defInt': 2,
-                    'defFR': 2,
-                    'defSack': 1,
-                    'defTD': 6,
-                    'defRetTD': 6,
-                    'defSafety': 2,
-                    'defPA': dpa,
-                    'defYdsAllowed': dya}
+        settings = {'passYds': 0.04, 'passTD': 4, 'passInt': -2,
+                    'rushYds': 0.1, 'rushTD': 6, 'fumblesLost': -2,
+                    'receptions': 1, 'recYds': 0.1, 'recTD': 6,
+                    'defInt': 2, 'defFR': 2, 'defSack': 1,
+                    'defTD': 6, 'defRetTD': 6, 'defSafety': 2,
+                    'defPA': dpa, 'defYdsAllowed': dya,
+                    'fg': 4, 'xp': 1}
 
         s = 0
         for stat in settings:
             if callable(settings[stat]):
-                s += settings[stat](float(stats[stat]))
+                if stats['position'] == 'DEF':
+                    s += settings[stat](float(stats[stat]))
             else:
-                s += float(stats[stat])
+                s += float(stats[stat]) * settings[stat]
         return s
 
     @cached_property
     def projections(self):
+        """ Get projections dictionary """
         proj = dict()
         for p in ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']:
             tab = self.nerd('weekly-projections', p, self.week)['Projections']
             for row in tab:
                 proj[int(row['playerId'])] = {'week': self.score(row),
                                               'ros': self.score(row)}
-            for w in range(self.week, 3):
+            for w in range(self.week + 1, self.total_weeks + 1):
                 table = self.nerd('weekly-projections', p, w)['Projections']
                 for row in table:
-                    mul = self.discount ** (w - 1)
+                    mul = self.discount ** (w - self.week)
                     proj[int(row['playerId'])]['ros'] += self.score(row) * mul
         return proj
 
@@ -149,7 +140,7 @@ class Football:
                                 position,
                                 player.proTeam)
         nerd_id = self.get_nerd_id(global_id)
-        if self.get_nerd_id(global_id):
+        if nerd_id in self.projections:
             return {'name': player.name,
                     'position': position,
                     'team': player.proTeam,
@@ -174,11 +165,11 @@ class Football:
         """ Wrap up common calls for all Nerd APIs """
         base = 'https://www.fantasyfootballnerd.com/service'
         args = '/'.join([str(a) for a in kwargs])
-        response = requests.get('{}/{}/json/{}/{}'
-                                .format(base,
-                                        service,
+        url = '{}/{}/json/{}/{}'.format(base, service,
                                         self.secret['nerd_api_key'],
-                                        args))
+                                        args)
+        self.log.info('GET: {}'.format(url))
+        response = requests.get(url)
         response.raise_for_status()
         return json.loads(response.content)
 
@@ -207,6 +198,7 @@ class Football:
                                name)
 
     def get_nerd_id(self, global_id):
+        """ Get Nerd ID based on Global ID """
         if global_id in self.nerd_players:
             return self.nerd_players[str(global_id)]
         else:
@@ -215,4 +207,4 @@ class Football:
 
 if __name__ == '__main__':
     f = Football(debug=True)
-    print(f.roster)
+    print(f.roster[0])
