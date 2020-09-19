@@ -169,7 +169,7 @@ class Football:
         base = 'https://www.fantasyfootballnerd.com/service'
         args = '/'.join([str(a) for a in kwargs])
         url = '{}/{}/json/{}/{}'.format(base, service,
-                                        self.secret['nerd_api_key'],
+                                        self.secret['ffn_api_key'],
                                         args)
         response = requests.get(url)
         response.raise_for_status()
