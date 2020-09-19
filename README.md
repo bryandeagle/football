@@ -1,5 +1,5 @@
 # Fantasy Football Auto Pilot 🏈
-This tool sends me a well-formatted email informing me which waivers to choose, and how to set my line-up
+This tool informs me which waivers to choose, and how to set my line-up each week
 
 ## Installing
 ```
@@ -14,6 +14,7 @@ pip install -r requirements.txt
 Create **secrets.json** with the following format
 ```
 {
+  "ffn_api_key": "",
   "swid":  "",
   "espn_s2":  ""
 }
