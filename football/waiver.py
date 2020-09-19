@@ -33,6 +33,7 @@ def pretty_print(moves):
 if __name__ == '__main__':
     football = Football()
 
+    print('\n  TOP FREE AGENTS BY POSITION:')
     for pos in football.slots.keys():
         fas = football.free_agents_by_pos(pos)
         team = football.roster_by_pos(pos, sort=True)
