@@ -1,16 +1,17 @@
-from ffn import Football
+from football import Football
 
 
-def pretty_print(players, max_len):
+def pretty_print(players, max_len, title):
     """ Prints the bench in a nice fancy way """
-    print('┌──────┬─' + '─' * max_len + '─┬───────┐')
-    print('│ POS  │ {:<{}} │ PTS   │'.format('BENCH', max_len))
-    print('├──────┼─' + '─' * max_len + '─┼───────┤')
+    print('┌──────┬─{l:─^{n}}─┬───────┐\n'
+          '│ POS  │ {t: <{n}} │ PTS   │\n'
+          '├──────┼─{l:─^{n}}─┼───────┤'
+          .format(l='─', n=max_len, t=title))
     for player in players:
         pts = '{:.2f}'.format(player['score']).zfill(5)
         print('│ {:<4} │ {:<{}} │ {} │'
               .format(player['position'], player['name'], max_len, pts))
-    print('└──────┴─' + '─' * max_len + '─┴───────┘')
+    print('└──────┴─{:─^{}}─┴───────┘'.format('─', max_len))
 
 
 if __name__ == '__main__':
@@ -25,5 +26,5 @@ if __name__ == '__main__':
 
     # Print line-up and bench
     max_len = max([len(p['name']) for p in football.roster])
-    pretty_print(lineup, max_len)
-    pretty_print(bench, max_len)
+    pretty_print(lineup, max_len, 'LINE-UP')
+    pretty_print(bench, max_len, 'BENCH')

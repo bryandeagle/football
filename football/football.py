@@ -38,7 +38,7 @@ class Football:
         if sort:
             return sorted(roster, key=lambda p: p['score'], reverse=True)
         return roster
-        
+
     @cached_property
     def week(self):
         """ Get the NFL week number given the first week """
@@ -75,8 +75,12 @@ class Football:
         espn_players = self.espn.get_team_data(self.espn_team).roster
         return list(map(self.espn_to_dict, espn_players))
 
-    def free_agents_by_pos(self, position):
-        return [p for p in self.free_agents if p['position'] == position]
+    def free_agents_by_pos(self, position, sort=False):
+        """ Return free agents """
+        fas = [p for p in self.free_agents if p['position'] == position]
+        if sort:
+            return sorted(fas, key=lambda p: p['score'], reverse=True)
+        return fas
 
     @cached_property
     def free_agents(self):
