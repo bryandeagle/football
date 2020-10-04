@@ -64,9 +64,11 @@ class Football:
     @cached_property
     def secret(self):
         """ Get the secrets from JSON file """
-        if not os.path.isfile('secrets.json'):
+        this_dir = os.path.dirname(os.path.realpath(__file__))
+        secrets_file = os.path.join(this_dir, 'secrets.json')
+        if not os.path.isfile(secrets_file):
             raise ValueError('Secrets file missing')
-        with open('secrets.json', 'rt') as f:
+        with open(secrets_file, 'rt') as f:
             return json.loads(f.read())
 
     @cached_property
