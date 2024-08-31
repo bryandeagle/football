@@ -21,18 +21,14 @@ class League:
         """Get Football week number"""
         return 1  # TODO: Implement
 
-    def roster(self, position: str) -> dict:
+    def roster(self, pos: str) -> dict:
         """Get team roster for given position"""
-        return [
-            Player(p, self.week) for p in self.team.roster if p.position == position
-        ]
+        return [Player(p, self.week) for p in self.team.roster if p.position == pos]
 
     def free_agents(self, position: str) -> list:
         """Get free agents for given position"""
-        players = list()  # Make projections less cumbersome
-        for player in self.league.free_agents(size=1000, position=position):
-            players.append(Player(player, self.week))
-        return players
+        players = self.league.free_agents(size=1000, position=position)
+        return [Player(p, self.week) for p in players]
 
 
 class Player(EspnPlayer):
@@ -43,13 +39,10 @@ class Player(EspnPlayer):
     def __init__(self, player, week):
         self.player, self.no = player, week
 
-        # Convient way to access projections
+        # Convient way to access properties
         self.season = player.stats[0]["projected_points"]
         self.weekly = player.stats[week]["projected_points"]
         self.team = player.proTeam
-
-    def puke(self):
-        return json.dumps(self.player.__dict__, indent=4, default=str)
 
     def __getattr__(self, attribute):
         """Get ESPN attribute"""
