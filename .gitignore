@@ -1,2 +1,10 @@
-env/*
+# Environment
+env/
+
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Credentials
 config.yml
