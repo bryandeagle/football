@@ -37,12 +37,10 @@ class Player(EspnPlayer):
     projectsions and pretty printing"""
 
     def __init__(self, player, week):
-        self.player, self.no = player, week
-
-        # Convient way to access properties
         self.season = player.stats[0]["projected_points"]
         self.weekly = player.stats[week]["projected_points"]
         self.team = player.proTeam
+        self.player = player
 
     def __getattr__(self, attribute):
         """Get ESPN attribute"""
