@@ -2,7 +2,6 @@ from espn_api.football.player import Player as EspnPlayer
 from espn_api.football import League as EspnLeague
 from os import path
 import yaml
-import json
 
 
 class League:
