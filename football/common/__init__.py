@@ -41,7 +41,7 @@ def send_mail(config: dict, subject: str, text: str) -> None:
             "text": text,
         },
     )
-    logger.info(f"Send {subject} email")
+    logger.info(f"Sent {subject} email")
 
 
 class League:
