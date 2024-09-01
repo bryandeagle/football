@@ -4,7 +4,6 @@ Determine ideal team line-up based on this week's projections
 
 from os import getenv
 import common
-import wmill
 
 
 if __name__ == "__main__":
@@ -28,9 +27,8 @@ if __name__ == "__main__":
 
     # TE / K / DST
     for pos in ("TE", "D/ST", "K"):
-        lineup[pos] = sorted(league.roster(pos), key=lambda p: p.weekly, reverse=True)[
-            0
-        ]
+        roster = league.roster(pos)
+        lineup[pos] = sorted(roster, key=lambda p: p.weekly, reverse=True)[0]
 
     # Display line-up
     text = "Team Line-Up\n============\n"

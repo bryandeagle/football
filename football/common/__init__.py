@@ -49,14 +49,16 @@ class League:
         # Initialize ESPN API with creds in config.yml
         settings = ("league_id", "year", "espn_s2", "swid")
         self.league = EspnLeague(**{k: config[k] for k in settings})
-        self.team = [t for t in self.league.teams if t.team_id == config["team_id"]][0]
+        team = config["team_id"]  # Get team ID from config
+        self.team = [t for t in self.league.teams if t.team_id == team][0]
         logger.info(f"Team is {self.team.team_name}")
         self.week = self.league.nfl_week
         logger.info(f"Determined week number {self.week}")
 
     def roster(self, pos: str) -> dict:
         """Get team roster for given position"""
-        return [Player(p, self.week) for p in self.team.roster if p.position == pos]
+        roster = self.team.roster
+        return [Player(p, self.week) for p in roster if p.position == pos]
 
     def free_agents(self, position: str) -> list:
         """Get free agents for given position"""
