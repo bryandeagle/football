@@ -28,7 +28,9 @@ if __name__ == "__main__":
 
     # TE / K / DST
     for pos in ("TE", "D/ST", "K"):
-        lineup[pos] = sorted(league.roster(pos), key=lambda p: p.weekly, reverse=True)[0]
+        lineup[pos] = sorted(league.roster(pos), key=lambda p: p.weekly, reverse=True)[
+            0
+        ]
 
     # Display line-up
     text = "Team Line-Up\n============\n"
