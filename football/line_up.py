@@ -6,8 +6,6 @@ from common import League
 
 
 if __name__ == "__main__":
-    print("Team Line-Up\n============\n")
-
     # For each position find better weekly player
     league, lineup = League(), dict()
     
@@ -30,6 +28,7 @@ if __name__ == "__main__":
         lineup[pos] = sorted(league.roster(pos), key=lambda p: p.weekly, reverse=True)[0]
 
     # Display line-up
+    print("\nTeam Line-Up\n============\n")
     for position in lineup:
         print(f"{position}: {lineup[position]} ({lineup[position].weekly:.0f} pts)")
 

@@ -6,7 +6,6 @@ from common import League
 
 
 if __name__ == "__main__":
-    print("Free Agent Selections\n=====================\n")
     threshold = 2  # Number of points to be worth picking up
 
     # For each position find better weekly player
@@ -18,6 +17,7 @@ if __name__ == "__main__":
         moves.extend([{"drop": drop, "take": t} for t in take])
 
     # Display moves
+    print("\nFree Agent Selections\n=====================\n")
     for i, move in enumerate(moves):
         bonus = move["take"].weekly - move["drop"].weekly
         print(f"{i+1}. Drop {move['drop']} take {move['take']} for {bonus:+.0f} pts")

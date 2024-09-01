@@ -6,8 +6,6 @@ from common import League
 
 
 if __name__ == "__main__":
-    print("Waiver Wire Selections\n======================\n")
-
     # Find top three seasonal free agents by position
     league, moves = League(), list()
     for pos in ("QB", "RB", "WR", "TE", "D/ST"):
@@ -17,6 +15,7 @@ if __name__ == "__main__":
         moves.extend([{"drop": drop, "take": t} for t in take])
 
     # Display moves
+    print("\nWaiver Wire Selections\n======================\n")
     for i, move in enumerate(moves):
         bonus = move["take"].season - move["drop"].season
         print(f"{i+1}. Drop {move['drop']} take {move['take']} for {bonus:+.0f} pts")
