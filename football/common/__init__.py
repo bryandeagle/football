@@ -23,7 +23,7 @@ class League:
         if getenv("WM_WORKSPACE", None):
             # Get configuration from Windmill
             logger.info("Loading config from windmill variable")
-            config = wmill.get_variable("u/admin/config")
+            config = yaml.safe_load(wmill.get_variable("u/admin/config"))
         else:
             # Load configuration from YAML file
             logger.info(f"Loading config from {self.CONFIG}")
