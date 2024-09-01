@@ -2,13 +2,16 @@
 Determine ideal team line-up based on this week's projections
 """
 
-from common import League
+from os import getenv
+import common
+import wmill
 
 
 if __name__ == "__main__":
     # For each position find better weekly player
-    league, lineup = League(), dict()
-    
+    config = common.get_config()
+    league, lineup = common.League(config), dict()
+
     # QB/OP
     qbs = sorted(league.roster("QB"), key=lambda p: p.weekly, reverse=True)
     lineup["QB"], lineup["OP"] = qbs.pop(0), qbs.pop(0)
@@ -28,7 +31,12 @@ if __name__ == "__main__":
         lineup[pos] = sorted(league.roster(pos), key=lambda p: p.weekly, reverse=True)[0]
 
     # Display line-up
-    print("\nTeam Line-Up\n============\n")
-    for position in lineup:
-        print(f"{position}: {lineup[position]} ({lineup[position].weekly:.0f} pts)")
+    text = "Team Line-Up\n============\n"
+    for pos in lineup:
+        text += f"{pos}: {lineup[pos]} ({lineup[pos].weekly:.0f} pts)\n"
 
+    # Email or print lineup
+    if getenv("WM_WORKSPACE", None):
+        common.send_mail(config, "Team Line-Up", text)
+    else:
+        print("\n" + text)

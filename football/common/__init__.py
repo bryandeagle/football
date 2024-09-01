@@ -1,36 +1,51 @@
 from espn_api.football.player import Player as EspnPlayer
 from espn_api.football import League as EspnLeague
 from os import path, getenv
+import requests
 import logging
 import wmill
 import yaml
 import sys
 
 
+# Configure logging
 logging.basicConfig(
-    stream=sys.stdout,
-    level=logging.INFO,
-    format="%(levelname)s:%(message)s"
+    stream=sys.stdout, level=logging.INFO, format="%(levelname)s:%(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
+def get_config():
+    """Load configuration"""
+    if getenv("WM_WORKSPACE", None):
+        # Get configuration from Windmill
+        logger.info("Loading config from windmill variable")
+        return yaml.safe_load(wmill.get_variable("u/admin/config"))
+    else:
+        # Load configuration from YAML file
+        logger.info("Loading config from file")
+        base = path.dirname(path.abspath(__file__))
+        with open(path.join(base, "..", "..", "config.yml"), "rt") as f:
+            return yaml.safe_load(f)
+
+
+def send_mail(config: dict, subject: str, text: str) -> None:
+    """Send email with mailgun"""
+    requests.post(
+        "https://api.mailgun.net/v3/mg.dea.gl/messages",
+        auth=("api", config["mailgun"]),
+        data={
+            "from": "Fantasy AutoPilot <autopilot@mg.dea.gl>",
+            "to": "bryan@dea.gl",
+            "subject": subject,
+            "text": text,
+        },
+    )
+    logger.info(f"Send {subject} email")
+
+
 class League:
-    CONFIG = "config.yml"
-
-    def __init__(self):
-        windmill = getenv("WM_WORKSPACE", None)
-        if getenv("WM_WORKSPACE", None):
-            # Get configuration from Windmill
-            logger.info("Loading config from windmill variable")
-            config = yaml.safe_load(wmill.get_variable("u/admin/config"))
-        else:
-            # Load configuration from YAML file
-            logger.info(f"Loading config from {self.CONFIG}")
-            base = path.dirname(path.abspath(__file__))
-            with open(path.join(base, "..", "..", self.CONFIG), "rt") as f:
-                config = yaml.safe_load(f)
-
+    def __init__(self, config: dict):
         # Initialize ESPN API with creds in config.yml
         settings = ("league_id", "year", "espn_s2", "swid")
         self.league = EspnLeague(**{k: config[k] for k in settings})
