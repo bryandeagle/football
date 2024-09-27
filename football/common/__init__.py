@@ -1,12 +1,12 @@
-from espn_api.football.player import Player as EspnPlayer
-from espn_api.football import League as EspnLeague
-from os import path, getenv
-import requests
 import logging
+import sys
+from os import getenv, path
+
+import requests
 import wmill
 import yaml
-import sys
-
+from espn_api.football import League as EspnLeague
+from espn_api.football.player import Player as EspnPlayer
 
 # Configure logging
 logging.basicConfig(
@@ -72,7 +72,7 @@ class Player(EspnPlayer):
     projectsions and pretty printing"""
 
     def __init__(self, player, week):
-        self.season = player.stats[0]["projected_points"]
+        self.season = player.projected_total_points
         self.weekly = player.stats[week]["projected_points"]
         self.team = player.proTeam
         self.player = player
