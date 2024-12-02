@@ -15,14 +15,14 @@ if __name__ == "__main__":
     with database.cursor() as cursor:
 
         # Get all known rankings from database
-        query = "select distinct expert,year,week,slot from weekly;"
+        query = "select distinct expert,year,slot from weekly where week is null;"
         cursor.execute(query)
         known_rankings = cursor.fetchall()
 
         # Loop through experts weeks and years
         for expert in EXPERTS:
             for slot in {"QB", "RB", "WR", "TE", "DST", "K"}:
-                if (expert, YEAR, week, slot) not in known_rankings:
+                if (expert, YEAR, slot) not in known_rankings:
                     ranks = fantasy.rank(
                         expert=expert,
                         slot=slot,
