@@ -1,3 +1,5 @@
+beautifulsoup4
 espn_api
 pyyaml
-wmill
+sqlalchemy
+psycopg2-binary
